@@ -1,6 +1,6 @@
 from data_provider.data_factory import data_provider
 from exp.exp_basic import Exp_Basic
-from models import Transformer, Informer, Autoformer
+from models import Transformer, Informer, Autoformer,Merge
 from ns_models import ns_Transformer, ns_Informer, ns_Autoformer
 from utils.tools import EarlyStopping, adjust_learning_rate, visual
 from utils.metrics import metric
@@ -32,6 +32,7 @@ class Exp_Main(Exp_Basic):
             'ns_Transformer': ns_Transformer,
             'ns_Informer': ns_Informer,
             'ns_Autoformer': ns_Autoformer,
+            'Merge':Merge
         }
         model = model_dict[self.args.model].Model(self.args).float()
 
