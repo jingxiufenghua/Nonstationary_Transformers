@@ -232,8 +232,13 @@ class Exp_Main(Exp_Basic):
                 f_dim = -1 if self.args.features == 'MS' else 0
                 outputs = outputs[:, -self.args.pred_len:, f_dim:]
                 batch_y = batch_y[:, -self.args.pred_len:, f_dim:].to(self.device)
+
+                outputs_reverse = test_data.inverse_transform(outputs)
+                batch_y_reverse = test_data.inverse_transform(batch_y)
+
                 outputs = outputs.detach().cpu().numpy()
                 batch_y = batch_y.detach().cpu().numpy()
+
 
                 pred = outputs  # outputs.detach().cpu().numpy()  # .squeeze()
                 true = batch_y  # batch_y.detach().cpu().numpy()  # .squeeze()
@@ -241,13 +246,15 @@ class Exp_Main(Exp_Basic):
                 preds.append(pred)
                 trues.append(true)
                 if i % 20 == 0:
-                    input = batch_x.detach().cpu().numpy()
-                    gt = np.concatenate((input[0, :, -1], true[0, :, -1]), axis=0)
-                    pd = np.concatenate((input[0, :, -1], pred[0, :, -1]), axis=0)
+                    input = test_data.inverse_transform(batch_x).detach().cpu().numpy()
+                    gt = np.concatenate((input[0, :, -1], batch_y_reverse[0, :, -1].detach().cpu().numpy()), axis=0)
+                    pd = np.concatenate((input[0, :, -1], outputs_reverse[0, :, -1].detach().cpu().numpy()), axis=0)
+                    print("real",gt)
+                    print("predict",pd)
                     visual(gt, pd, os.path.join(folder_path, str(i) + '.pdf'))
 
-        preds = np.array(preds)
-        trues = np.array(trues)
+        preds = np.concatenate(preds, axis=0)
+        trues = np.concatenate(trues, axis=0)
         print('test shape:', preds.shape, trues.shape)
         preds = preds.reshape(-1, preds.shape[-2], preds.shape[-1])
         trues = trues.reshape(-1, trues.shape[-2], trues.shape[-1])
